@@ -22,7 +22,7 @@ function varargout = VPMR(varargin)
 
 % Edit the above text to modify the response to help VPMR
 
-% Last Modified by GUIDE v2.5 14-Dec-2020 00:45:30
+% Last Modified by GUIDE v2.5 11-Jan-2021 20:46:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -76,6 +76,7 @@ handles.s=[];
 handles.accindex=1;
 handles.mrterms=0;
 handles.intindex=2;
+handles.records={'Record'};
 set(handles.pushbutton1,'Visible','Off');
 set(handles.pushbutton3,'Visible','Off');
 set(handles.pushbutton4,'Visible','Off');
@@ -111,6 +112,12 @@ set(handles.popupmenu5,'Visible','Off');
 set(handles.popupmenu6,'Visible','Off');
 set(handles.text27,'Visible','Off');
 set(handles.radiobutton2,'Visible','Off');
+set(handles.edit13,'Visible','Off');
+set(handles.edit14,'Visible','Off');
+set(handles.edit15,'Visible','Off');
+set(handles.text28,'Visible','Off');
+set(handles.text29,'Visible','Off');
+set(handles.text30,'Visible','Off');
 % Update handles structure
 guidata(hObject, handles);
 
@@ -228,7 +235,7 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles.popindex=get(handles.popupmenu1,'Value');
-if handles.popindex==2 || handles.popindex==5
+if handles.popindex==2 || handles.popindex==6
     acc=handles.accindex;
     x=str2double(get(handles.edit3,'string'));handles.xmax=x;
     n=str2double(get(handles.edit1,'string'));handles.n=n;
@@ -240,7 +247,8 @@ if handles.popindex==2 || handles.popindex==5
         handles.xmin=v;handles.stepsize=stepsize;
     end
     scale=str2double(get(handles.edit2,'string'));handles.scale=scale;
-    s=get(handles.edit4,'string');handles.s=s;
+    s=get(handles.edit4,'string');handles.s=s;handles.records=[handles.records,{s}];
+    set(handles.popupmenu7,'String',handles.records);
     set(handles.text8,'string','Now Loading');
     if handles.radioindex==0
         handles.err=exptexting2(x,n,scale,s,v,stepsize,acc);
@@ -253,14 +261,16 @@ if handles.popindex==2 || handles.popindex==5
     set(handles.text8,'string',num2str(digitts));
     axes(handles.axes1);
     plot(handles.err(1,:),handles.err(3,:));
+    xlabel('x');ylabel('Error');
     guidata(hObject, handles); 
-elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || handles.popindex==7
+elseif handles.popindex==4 || handles.popindex==5 || handles.popindex==8 || handles.popindex==9
     u=eval(get(handles.edit3,'string'));handles.xmax=u;
     n=eval(get(handles.edit1,'string'));handles.n=n;
     zz=eval(get(handles.edit2,'string'));handles.scale=zz;
-    s=get(handles.edit4,'string');handles.s=[s,'--SOG'];
+    s=get(handles.edit4,'string');handles.s=[s,'--SOG'];handles.records=[handles.records,{s}];
+    set(handles.popupmenu7,'String',handles.records);
     g=@(x) eval(s);
-    if handles.popindex==3 || handles.popindex==4
+    if handles.popindex==4 || handles.popindex==5
         digitts=eval(get(handles.edit7,'string'));
         handles.digitts=digitts;
     else
@@ -363,7 +373,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
             C(r+1)=mp(sum1,digitts);
         end
     end
-    if handles.popindex==3 || handles.popindex==4
+    if handles.popindex==4 || handles.popindex==5
         v=eval(get(handles.edit8,'string'));handles.xmin=v;
         stepsize=eval(get(handles.edit9,'string'));handles.stepsize=stepsize;
         x=(v+stepsize):stepsize:u;
@@ -406,7 +416,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
     set(handles.text12,'string','Model Reduction');drawnow;
     set(handles.text11,'string','(4/12)');drawnow;
     n=2*n;mp.Digits(digitts);
-    if handles.popindex==3 || handles.popindex==4
+    if handles.popindex==4 || handles.popindex==5
         v=eval(get(handles.edit8,'string'));
         stepsize=eval(get(handles.edit9,'string'));
         x=(v+stepsize):stepsize:u;
@@ -439,9 +449,9 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
             B(i)=mp(-sqrt(mp(-X(i+1),digitts)),digitts);
         end
     end
-    BBB=B*B';
-    CCC=C'*C;
-    AA=A2+A2';
+    BBB=B*B.';
+    CCC=C.'*C;
+    AA=A2+A2.';
     set(handles.text12,'string','Preparing P and Q');drawnow;
     set(handles.text11,'string',' ');drawnow;
     P=-BBB./AA;Q=-CCC./AA;
@@ -458,7 +468,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
     end
     P=tril(ones(n-1)).*P;Q=tril(ones(n-1)).*Q;
     Lc=P;
-    LL=P'*Q;
+    LL=P.'*Q;
     set(handles.text12,'string','SVD.It takes some time.');drawnow;
     set(handles.text11,'string','(7/12)');drawnow;
     [U,sigma,V]=svd(LL);
@@ -479,7 +489,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
     handles.Anew=Anew;
     handles.Bnew=Bnew;
     handles.Cnew=Cnew;
-    if handles.popindex==3 || handles.popindex==6
+    if handles.popindex==4 || handles.popindex==8
         choos=str2double(get(handles.edit5,'string'));
         handles.mrterms=choos;
         Anew=Anew(1:choos,1:choos);
@@ -495,7 +505,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         p=diag(Aeig);
         approx=zeros(N,1);
         approx=approx+double(X(1));
-        if handles.popindex==3 || handles.popindex==4
+        if handles.popindex==4 || handles.popindex==5
             v=eval(get(handles.edit8,'string'));
             stepsize=eval(get(handles.edit9,'string'));
             x=(v+stepsize):stepsize:u;
@@ -518,6 +528,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         handles.errors=max(abs(errors));
         axes(handles.axes1);
         plot(x,errors);
+        xlabel('x');ylabel('Error');
         set(handles.text8,'string',num2str(max(abs(approx-y))));drawnow;
         handles.pp=double(p);
         handles.ww=double(w);
@@ -528,7 +539,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         set(handles.edit6,'Visible','On');
         guidata(hObject, handles);
     else
-        if handles.popindex==4
+        if handles.popindex==5
             v=eval(get(handles.edit8,'string'));
             stepsize=eval(get(handles.edit9,'string'));
             x=(v+stepsize):stepsize:u;
@@ -570,6 +581,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         handles.errs=errs;
         axes(handles.axes1);
         semilogy(1:n,errs);
+        xlabel('The number of terms');ylabel('Maximum error');
         set(handles.text12,'string','Clear!');drawnow;
         set(handles.text11,'string','100%');drawnow;
         set(handles.text13,'Visible','On');
@@ -579,6 +591,32 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         set(handles.edit6,'Visible','On');
         guidata(hObject, handles); 
     end
+elseif handles.popindex==3 || handles.popindex==7
+    acc=handles.accindex;
+    x=str2double(get(handles.edit3,'string'));handles.xmax=x;
+    n=str2double(get(handles.edit1,'string'));handles.n=n;
+    if handles.popindex==3
+        v=eval(get(handles.edit8,'string'));handles.v=v;
+        stepsize=eval(get(handles.edit9,'string'));handles.stepsize=stepsize;
+    else
+        v=0;stepsize=0.002;
+        handles.xmin=v;handles.stepsize=stepsize;
+    end
+    s=get(handles.edit4,'string');handles.s=s;handles.records=[handles.records,{s}];
+    set(handles.popupmenu7,'String',handles.records);
+    scstart=eval(get(handles.edit13,'string'));
+    scend=eval(get(handles.edit14,'string'));
+    scstep=eval(get(handles.edit15,'string'));
+    scale=scstart:scstep:scend;
+    handles.err=mexptexting2(x,n,scale,s,v,stepsize,acc);
+    axes(handles.axes1);
+    semilogy(scale,handles.err);
+    xlabel('scale/n');ylabel('Error');
+    err=min(handles.err);
+    whereerr=find(handles.err==err);
+    set(handles.text8,'string',num2str(err));drawnow;
+    set(handles.text11,'string',['scale/n=' num2str(scale(whereerr(1)))]);drawnow;
+    guidata(hObject, handles);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -621,8 +659,8 @@ if handles.popindex==2
     set(handles.text13,'Visible','Off');
     set(handles.text15,'Visible','Off');
     set(handles.edit6,'Visible','Off');
-    set(handles.text16,'Visible','On');
-    set(handles.edit7,'Visible','On');
+    set(handles.text16,'Visible','Off');
+    set(handles.edit7,'Visible','Off');
     set(handles.edit8,'Visible','On');
     set(handles.edit9,'Visible','On');
     set(handles.text19,'Visible','On');
@@ -637,7 +675,13 @@ if handles.popindex==2
     set(handles.popupmenu6,'Visible','Off');
     set(handles.text27,'Visible','Off');
     set(handles.pushbutton6,'Visible','On');
-elseif handles.popindex==4
+    set(handles.edit13,'Visible','Off');
+    set(handles.edit14,'Visible','Off');
+    set(handles.edit15,'Visible','Off');
+    set(handles.text28,'Visible','Off');
+    set(handles.text29,'Visible','Off');
+    set(handles.text30,'Visible','Off');
+elseif handles.popindex==5
     set(handles.pushbutton1,'Visible','On');
     set(handles.pushbutton3,'Visible','On');
     set(handles.pushbutton4,'Visible','Off');
@@ -671,7 +715,53 @@ elseif handles.popindex==4
     set(handles.popupmenu6,'Visible','Off');
     set(handles.text27,'Visible','Off');
     set(handles.pushbutton6,'Visible','On');
+    set(handles.edit13,'Visible','Off');
+    set(handles.edit14,'Visible','Off');
+    set(handles.edit15,'Visible','Off');
+    set(handles.text28,'Visible','Off');
+    set(handles.text29,'Visible','Off');
+    set(handles.text30,'Visible','Off');
 elseif handles.popindex==3
+    set(handles.pushbutton1,'Visible','On');
+    set(handles.pushbutton3,'Visible','On');
+    set(handles.pushbutton4,'Visible','Off');
+    set(handles.text3,'Visible','On');
+    set(handles.text4,'Visible','Off');
+    set(handles.text5,'Visible','On');
+    set(handles.edit1,'Visible','On');
+    set(handles.edit2,'Visible','Off');
+    set(handles.edit3,'Visible','On');
+    set(handles.edit5,'Visible','Off');
+    set(handles.text7,'Visible','On');
+    set(handles.text8,'Visible','On');
+    set(handles.text11,'Visible','On');
+    set(handles.text12,'Visible','On');
+    set(handles.text13,'Visible','Off');
+    set(handles.text15,'Visible','Off');
+    set(handles.edit6,'Visible','Off');
+    set(handles.text16,'Visible','Off');
+    set(handles.edit7,'Visible','Off');
+    set(handles.edit8,'Visible','On');
+    set(handles.edit9,'Visible','On');
+    set(handles.text19,'Visible','On');
+    set(handles.text20,'Visible','On');
+    set(handles.radiobutton2,'Visible','Off');
+    set(handles.text23,'Visible','Off');
+    set(handles.text24,'Visible','Off');
+    set(handles.text25,'Visible','Off');
+    set(handles.text26,'Visible','On');
+    set(handles.popupmenu4,'Visible','On');
+    set(handles.popupmenu5,'Visible','Off');
+    set(handles.popupmenu6,'Visible','Off');
+    set(handles.text27,'Visible','Off');
+    set(handles.pushbutton6,'Visible','On');
+    set(handles.edit13,'Visible','On');
+    set(handles.edit14,'Visible','On');
+    set(handles.edit15,'Visible','On');
+    set(handles.text28,'Visible','On');
+    set(handles.text29,'Visible','On');
+    set(handles.text30,'Visible','On');
+elseif handles.popindex==4
     set(handles.pushbutton1,'Visible','On');
     set(handles.pushbutton3,'Visible','On');
     set(handles.pushbutton4,'Visible','Off');
@@ -705,6 +795,12 @@ elseif handles.popindex==3
     set(handles.popupmenu6,'Visible','Off');
     set(handles.text27,'Visible','Off');
     set(handles.pushbutton6,'Visible','On');
+    set(handles.edit13,'Visible','Off');
+    set(handles.edit14,'Visible','Off');
+    set(handles.edit15,'Visible','Off');
+    set(handles.text28,'Visible','Off');
+    set(handles.text29,'Visible','Off');
+    set(handles.text30,'Visible','Off');
 elseif handles.popindex==1  
     set(handles.pushbutton1,'Visible','Off');
     set(handles.pushbutton3,'Visible','Off');
@@ -739,7 +835,13 @@ elseif handles.popindex==1
     set(handles.popupmenu6,'Visible','Off');
     set(handles.text27,'Visible','Off');
     set(handles.pushbutton6,'Visible','On');
-elseif handles.popindex==5
+    set(handles.edit13,'Visible','Off');
+    set(handles.edit14,'Visible','Off');
+    set(handles.edit15,'Visible','Off');
+    set(handles.text28,'Visible','Off');
+    set(handles.text29,'Visible','Off');
+    set(handles.text30,'Visible','Off');
+elseif handles.popindex==6
     set(handles.pushbutton1,'Visible','On');
     set(handles.pushbutton3,'Visible','On');
     set(handles.pushbutton4,'Visible','Off');
@@ -757,13 +859,13 @@ elseif handles.popindex==5
     set(handles.text13,'Visible','Off');
     set(handles.text15,'Visible','Off');
     set(handles.edit6,'Visible','Off');
-    set(handles.text16,'Visible','On');
+    set(handles.text16,'Visible','Off');
     set(handles.edit7,'Visible','Off');
     set(handles.edit8,'Visible','Off');
     set(handles.edit9,'Visible','Off');
     set(handles.text19,'Visible','On');
     set(handles.text20,'Visible','On');
-    set(handles.text23,'Visible','On');
+    set(handles.text23,'Visible','Off');
     set(handles.text24,'Visible','On');
     set(handles.text25,'Visible','On');
     set(handles.radiobutton2,'Visible','Off');
@@ -773,7 +875,13 @@ elseif handles.popindex==5
     set(handles.popupmenu6,'Visible','Off');
     set(handles.text27,'Visible','Off');
     set(handles.pushbutton6,'Visible','On');
-elseif handles.popindex==6
+    set(handles.edit13,'Visible','Off');
+    set(handles.edit14,'Visible','Off');
+    set(handles.edit15,'Visible','Off');
+    set(handles.text28,'Visible','Off');
+    set(handles.text29,'Visible','Off');
+    set(handles.text30,'Visible','Off');
+elseif handles.popindex==8
     set(handles.pushbutton1,'Visible','On');
     set(handles.pushbutton3,'Visible','On');
     set(handles.pushbutton4,'Visible','Off');
@@ -807,7 +915,13 @@ elseif handles.popindex==6
     set(handles.popupmenu6,'Visible','Off');
     set(handles.text27,'Visible','Off');
     set(handles.pushbutton6,'Visible','On');
-elseif handles.popindex==7
+    set(handles.edit13,'Visible','Off');
+    set(handles.edit14,'Visible','Off');
+    set(handles.edit15,'Visible','Off');
+    set(handles.text28,'Visible','Off');
+    set(handles.text29,'Visible','Off');
+    set(handles.text30,'Visible','Off');
+elseif handles.popindex==9
     set(handles.pushbutton1,'Visible','On');
     set(handles.pushbutton3,'Visible','On');
     set(handles.pushbutton4,'Visible','Off');
@@ -841,6 +955,52 @@ elseif handles.popindex==7
     set(handles.popupmenu6,'Visible','Off');
     set(handles.text27,'Visible','Off');
     set(handles.pushbutton6,'Visible','On');
+    set(handles.edit13,'Visible','Off');
+    set(handles.edit14,'Visible','Off');
+    set(handles.edit15,'Visible','Off');
+    set(handles.text28,'Visible','Off');
+    set(handles.text29,'Visible','Off');
+    set(handles.text30,'Visible','Off');
+elseif handles.popindex==7
+    set(handles.pushbutton1,'Visible','On');
+    set(handles.pushbutton3,'Visible','On');
+    set(handles.pushbutton4,'Visible','Off');
+    set(handles.text3,'Visible','On');
+    set(handles.text4,'Visible','Off');
+    set(handles.text5,'Visible','On');
+    set(handles.edit1,'Visible','On');
+    set(handles.edit2,'Visible','Off');
+    set(handles.edit3,'Visible','On');
+    set(handles.edit5,'Visible','Off');
+    set(handles.text7,'Visible','On');
+    set(handles.text8,'Visible','On');
+    set(handles.text11,'Visible','On');
+    set(handles.text12,'Visible','On');
+    set(handles.text13,'Visible','Off');
+    set(handles.text15,'Visible','Off');
+    set(handles.edit6,'Visible','Off');
+    set(handles.text16,'Visible','Off');
+    set(handles.edit7,'Visible','Off');
+    set(handles.edit8,'Visible','Off');
+    set(handles.edit9,'Visible','Off');
+    set(handles.text19,'Visible','On');
+    set(handles.text20,'Visible','On');
+    set(handles.radiobutton2,'Visible','Off');
+    set(handles.text23,'Visible','Off');
+    set(handles.text24,'Visible','On');
+    set(handles.text25,'Visible','On');
+    set(handles.text26,'Visible','On');
+    set(handles.popupmenu4,'Visible','On');
+    set(handles.popupmenu5,'Visible','Off');
+    set(handles.popupmenu6,'Visible','Off');
+    set(handles.text27,'Visible','Off');
+    set(handles.pushbutton6,'Visible','On');
+    set(handles.edit13,'Visible','On');
+    set(handles.edit14,'Visible','On');
+    set(handles.edit15,'Visible','On');
+    set(handles.text28,'Visible','On');
+    set(handles.text29,'Visible','On');
+    set(handles.text30,'Visible','On');
 end
 guidata(hObject, handles); 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
@@ -866,7 +1026,7 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles.popindex=get(handles.popupmenu1,'Value');
-if handles.popindex==2 || handles.popindex==5
+if handles.popindex==2 || handles.popindex==6
     acc=handles.accindex;
     x=str2double(get(handles.edit3,'string'));
     n=str2double(get(handles.edit1,'string'));
@@ -877,7 +1037,8 @@ if handles.popindex==2 || handles.popindex==5
         v=0;stepsize=0.002;
     end
     scale=str2double(get(handles.edit2,'string'));
-    s=get(handles.edit4,'string');
+    s=get(handles.edit4,'string');handles.records=[handles.records,{s}];handles.s=s;
+    set(handles.popupmenu7,'String',handles.records);
     set(handles.text8,'string','Now Loading');
     if handles.radioindex==0
         handles.err=exptexting3(x,n,scale,s,v,stepsize,acc);
@@ -890,14 +1051,16 @@ if handles.popindex==2 || handles.popindex==5
     set(handles.text8,'string',num2str(digitts));
     axes(handles.axes1);
     plot(handles.err(1,:),handles.err(3,:));
+    xlabel('x');ylabel('Error');
     guidata(hObject, handles); 
-elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || handles.popindex==7
+elseif handles.popindex==4 || handles.popindex==5 || handles.popindex==8 || handles.popindex==9
     u=eval(get(handles.edit3,'string'));handles.xmax=u;
     n=eval(get(handles.edit1,'string'));handles.n=n;
     zz=eval(get(handles.edit2,'string'));handles.scale=zz;
-    s=get(handles.edit4,'string');handles.s=[s,'--SOE'];
+    s=get(handles.edit4,'string');handles.s=[s,'--SOE'];handles.records=[handles.records,{s}];
+    set(handles.popupmenu7,'String',handles.records);
     g=@(x) eval(s);
-    if handles.popindex==3 || handles.popindex==4
+    if handles.popindex==4 || handles.popindex==5
         digitts=eval(get(handles.edit7,'string'));
         handles.digitts=digitts;
     else
@@ -1000,7 +1163,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
             C(r+1)=mp(sum1,digitts);
         end
     end
-    if handles.popindex==3 || handles.popindex==4
+    if handles.popindex==4 || handles.popindex==5
         v=eval(get(handles.edit8,'string'));
         stepsize=eval(get(handles.edit9,'string'));
         handles.xmin=v;handles.stepsize=stepsize;
@@ -1045,7 +1208,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
     set(handles.text12,'string','Model Reduction');drawnow;
     set(handles.text11,'string','(4/12)');drawnow;
     n=2*n;mp.Digits(digitts);
-    if handles.popindex==3 || handles.popindex==4
+    if handles.popindex==4 || handles.popindex==5
         v=eval(get(handles.edit8,'string'));
         stepsize=eval(get(handles.edit9,'string'));
         x=(v+stepsize):stepsize:u;
@@ -1075,9 +1238,9 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
             B(i)=mp(-sqrt(mp(-X(i+1),digitts)),digitts);
         end
     end
-    BBB=B*B';
-    CCC=C'*C;
-    AA=A2+A2';
+    BBB=B*B.';
+    CCC=C.'*C;
+    AA=A2+A2.';
     set(handles.text12,'string','Preparing P and Q');drawnow;
     set(handles.text11,'string',' ');drawnow;
     P=-BBB./AA;Q=-CCC./AA;
@@ -1094,7 +1257,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
     end
     P=tril(ones(n-1)).*P;Q=tril(ones(n-1)).*Q;
     Lc=P;
-    LL=P'*Q;
+    LL=P.'*Q;
     set(handles.text12,'string','SVD.It takes some time.');drawnow;
     set(handles.text11,'string','(7/12)');drawnow;
     [U,sigma,V]=svd(LL);
@@ -1115,7 +1278,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
     handles.Anew=Anew;
     handles.Bnew=Bnew;
     handles.Cnew=Cnew;
-    if handles.popindex==3 || handles.popindex==6
+    if handles.popindex==4 || handles.popindex==8
         choos=str2double(get(handles.edit5,'string'));
         handles.mrterms=choos;
         Anew=Anew(1:choos,1:choos);
@@ -1131,7 +1294,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         p=diag(Aeig);
         approx=zeros(N,1);
         approx=approx+double(X(1));
-        if handles.popindex==3 || handles.popindex==4
+        if handles.popindex==4 || handles.popindex==5
             v=eval(get(handles.edit8,'string'));
             stepsize=eval(get(handles.edit9,'string'));
             x=(v+stepsize):stepsize:u;
@@ -1153,6 +1316,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         errors=abs(approx-y);
         axes(handles.axes1);
         plot(x,errors);
+        xlabel('x');ylabel('Error');
         handles.errors=max(abs(errors));
         set(handles.text8,'string',num2str(max(abs(approx-y))));drawnow;
         handles.pp=double(p);
@@ -1164,7 +1328,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         set(handles.edit6,'Visible','On');
         guidata(hObject, handles);
     else
-        if handles.popindex==4
+        if handles.popindex==5
             v=eval(get(handles.edit8,'string'));
             stepsize=eval(get(handles.edit9,'string'));
             x=(v+stepsize):stepsize:u;
@@ -1204,6 +1368,7 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         handles.errs=errs;
         axes(handles.axes1);
         semilogy(1:n,errs);
+        xlabel('The number of terms');ylabel('Maximum Error');
         set(handles.text12,'string','Clear!');drawnow;
         set(handles.text11,'string','100%');drawnow;
         set(handles.text13,'Visible','On');
@@ -1213,7 +1378,34 @@ elseif handles.popindex==3 || handles.popindex==4 || handles.popindex==6 || hand
         set(handles.edit6,'Visible','On');
         guidata(hObject, handles); 
     end
+elseif handles.popindex==3 || handles.popindex==7
+    acc=handles.accindex;
+    x=str2double(get(handles.edit3,'string'));handles.xmax=x;
+    n=str2double(get(handles.edit1,'string'));handles.n=n;
+    if handles.popindex==7
+        v=eval(get(handles.edit8,'string'));handles.v=v;
+        stepsize=eval(get(handles.edit9,'string'));handles.stepsize=stepsize;
+    else
+        v=0;stepsize=0.002;
+        handles.xmin=v;handles.stepsize=stepsize;
+    end
+    guidata(hObject, handles);
+    s=get(handles.edit4,'string');handles.s=s;handles.records=[handles.records,{s}];
+    set(handles.popupmenu7,'String',handles.records);
+    scstart=eval(get(handles.edit13,'string'));
+    scend=eval(get(handles.edit14,'string'));
+    scstep=eval(get(handles.edit15,'string'));
+    scale=scstart:scstep:scend;
+    handles.err=mexptexting3(x,n,scale,s,v,stepsize,acc);
+    axes(handles.axes1);
+    semilogy(scale,handles.err);
+    xlabel('scale/n');ylabel('Error');
+    err=min(handles.err);
+    whereerr=find(handles.err==err);
+    set(handles.text8,'string',num2str(err));drawnow;
+    set(handles.text11,'string',['scale/n=' num2str(scale(whereerr(1)))]);drawnow;
 end
+%(besselh(0,1,50*(x+0.05)).*exp(-50j*(x+0.05)))/4
 
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
@@ -1223,7 +1415,7 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 Xs=handles.XX;
 ps=handles.pp;
 ws=handles.ww;
-if handles.popindex==4 || handles.popindex==7
+if handles.popindex==5 || handles.popindex==9
     choos=str2double(get(handles.edit5,'string'));
     handles.mrterms=choos;
     Anew=handles.Anew;
@@ -1675,12 +1867,14 @@ ys=[u;K;y];
 
 function a = Chebyshev(x,n)
 %代入n，计算Tn
-a=zeros(1,n+1);
-a(1)=1;
-a(2)=x;
+xsize=size(x,2);
+a=zeros(xsize,n+1);
+a(:,1)=1;
+a(:,2)=x.';
 for i=3:n+1
-    a(i)=2*x*a(i-1)-a(i-2);
+    a(:,i)=2*x.'.*a(:,i-1)-a(:,i-2);
 end
+
 
 
 % --- Executes on selection change in popupmenu4.
@@ -1883,3 +2077,202 @@ set(handles.text27,'Visible','Off');
 set(handles.radiobutton2,'Visible','Off');
 % Update handles structure
 guidata(hObject, handles);
+
+
+
+function edit13_Callback(hObject, eventdata, handles)
+% hObject    handle to edit13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit13 as text
+%        str2double(get(hObject,'String')) returns contents of edit13 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit13_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit14_Callback(hObject, eventdata, handles)
+% hObject    handle to edit14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit14 as text
+%        str2double(get(hObject,'String')) returns contents of edit14 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit14_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit15_Callback(hObject, eventdata, handles)
+% hObject    handle to edit15 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit15 as text
+%        str2double(get(hObject,'String')) returns contents of edit15 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit15_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit15 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function err=mexptexting2(u,n,scales,s,v,stepsize,acc)
+%SOG
+g=@(x) eval(s);
+scales=n*scales;
+sc=size(scales,2);
+A=zeros(sc,2*n);
+if acc<1
+    for j=1:sc
+        scale=scales(j);
+        for i=0:2*n-1
+            t=i;
+            q=@(x) (2/pi)*cos(t*x).*g(sqrt(-scale*log((1+cos(x))/2)));
+            A(j,i+1)=quadgk(q,0,pi,'AbsTol',acc,'MaxIntervalCount',1e9,'RelTol',0);
+        end
+    end
+else
+     w=acc;
+    ww=ceil(sqrt(w));
+    d=2;
+    S=2*ww/d;
+    N=100;
+    [b1,b2]=grule(N);
+    for j=1:sc
+        scale=scales(j);
+        for i=0:2*n-1
+            t=i;
+            q=@(x) (2/pi)*cos(t*x).*g(sqrt(-scale*log((1+cos(x))/2)));
+            for tt=1:S
+                A(j,i+1)=A(j,i+1)+q(((2*tt-1+b1-ww)/ww)*pi/2+pi/2)*b2'*pi/2;
+            end
+            A(j,i+1)=A(j,i+1)/ww;
+        end
+    end
+end
+A(:,1)=A(:,1)/2;
+u=(v+stepsize):stepsize:u;
+scales=scales.';
+y=2*exp(-(u.^2)./scales)-1;
+K=zeros(sc,size(u,2));
+for i=1:size(u,2)
+    T=Chebyshev(y(:,i).',2*n-1);
+    for k=0:n
+        K(:,i)=K(:,i)+A(:,k+1).*T(:,k+1);
+    end
+    for k=1:n-1
+        K(:,i)=K(:,i)+(1-k/n)*A(:,k+n+1).*T(:,k+n+1);
+    end
+end
+z=g(u).*ones(sc,1);
+y=abs(z-K);
+err=max(y.');
+
+function err=mexptexting3(u,n,scales,s,v,stepsize,acc)
+%SOG
+g=@(x) eval(s);
+scales=n*scales;
+sc=size(scales,2);
+A=zeros(sc,2*n);
+if acc<1
+    for j=1:sc
+        scale=scales(j);
+        for i=0:2*n-1
+            t=i;
+            q=@(x) (2/pi)*cos(t*x).*g((-scale*log((1+cos(x))/2)));
+            A(j,i+1)=quadgk(q,0,pi,'AbsTol',acc,'MaxIntervalCount',1e9,'RelTol',0);
+        end
+    end
+else
+     w=acc;
+    ww=ceil(sqrt(w));
+    d=2;
+    S=2*ww/d;
+    N=100;
+    [b1,b2]=grule(N);
+    for j=1:sc
+        scale=scales(j);
+        for i=0:2*n-1
+            t=i;
+            q=@(x) (2/pi)*cos(t*x).*g((-scale*log((1+cos(x))/2)));
+            for tt=1:S
+                A(j,i+1)=A(j,i+1)+q(((2*tt-1+b1-ww)/ww)*pi/2+pi/2)*b2'*pi/2;
+            end
+            A(j,i+1)=A(j,i+1)/ww;
+        end
+    end
+end
+A(:,1)=A(:,1)/2;
+u=(v+stepsize):stepsize:u;
+scales=scales.';
+y=2*exp(-(u)./scales)-1;
+K=zeros(sc,size(u,2));
+for i=1:size(u,2)
+    T=Chebyshev(y(:,i).',2*n-1);
+    for k=0:n
+        K(:,i)=K(:,i)+A(:,k+1).*T(:,k+1);
+    end
+    for k=1:n-1
+        K(:,i)=K(:,i)+(1-k/n)*A(:,k+n+1).*T(:,k+n+1);
+    end
+end
+z=g(u).*ones(sc,1);
+y=abs(z-K);
+err=max(y.');
+
+
+% --- Executes on selection change in popupmenu7.
+function popupmenu7_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+index2=get(handles.popupmenu7,'Value');
+handles.s=handles.records{1,index2};
+set(handles.edit4,'String',handles.s);
+guidata(hObject, handles);
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu7 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu7
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu7_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
